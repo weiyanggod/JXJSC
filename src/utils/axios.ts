@@ -1,7 +1,8 @@
-import { useStore } from '@/stores/store'
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
+import { useStore } from '@/stores/store'
+
 // 数据返回的接口
 // 定义请求响应参数，不含data
 interface Result {
@@ -13,8 +14,6 @@ interface Result {
 interface ResultData<T = any> extends Result {
   data?: T
 }
-const URL: string = import.meta.env.VITE_API_BASE_URL
-console.log(URL)
 
 enum RequestEnums {
   TIMEOUT = 10000,
@@ -25,7 +24,7 @@ enum RequestEnums {
 
 const config = {
   // 默认地址
-  baseURL: (URL as string) || '/captial',
+  baseURL: '/jxjsc',
   // 设置超时时间
   timeout: RequestEnums.TIMEOUT as number,
   // 跨域时候允许携带凭证
@@ -42,7 +41,6 @@ class RequestHttp {
      * 客户端发送请求 -> [请求拦截器] -> 服务器
      * token校验(JWT) : 接受服务器返回的token,存储到vuex/pinia/本地储存当中
      */
-
     this.service.interceptors.request.use(
       (config: AxiosRequestConfig) => {
         return {
@@ -104,7 +102,7 @@ class RequestHttp {
   // 常用方法封装
   get<T>(url: string, params?: object): Promise<ResultData<T>> {
     return this.service.get(url, {
-      params: { ...params, year: useStore().year },
+      params: { ...params, year: useStore().year, month: useStore().month },
     })
   }
   post<T>(url: string, params?: object): Promise<ResultData<T>> {

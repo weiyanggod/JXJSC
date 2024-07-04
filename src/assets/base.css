@@ -1,23 +1,23 @@
 /*公共字体的样式 */
 @font-face {
   font-family: '优设标题黑';
-  src: url('./font/优设标题黑.ttf'); /* IE9 Compat Modes */
+  src: url('./font/优设标题黑.ttf');
 }
 @font-face {
   font-family: 'AlibabaPuHuiTi-2-35-Thin';
-  src: url('./font/AlibabaPuHuiTi-2-35-Thin.ttf'); /* IE9 Compat Modes */
+  src: url('./font/AlibabaPuHuiTi-2-35-Thin.ttf');
 }
 @font-face {
   font-family: 'AlibabaPuHuiTi-2-55-Regular';
-  src: url('./font/AlibabaPuHuiTi-2-55-Regular.ttf'); /* IE9 Compat Modes */
+  src: url('./font/AlibabaPuHuiTi-2-55-Regular.ttf');
 }
 @font-face {
   font-family: 'AlibabaPuHuiTi-2-95-ExtraBold';
-  src: url('./font/AlibabaPuHuiTi-2-95-ExtraBold.ttf'); /* IE9 Compat Modes */
+  src: url('./font/AlibabaPuHuiTi-2-95-ExtraBold.ttf');
 }
 @font-face {
   font-family: 'Adobe黑体StdR';
-  src: url('./font/Adobe黑体StdR.otf'); /* IE9 Compat Modes */
+  src: url('./font/Adobe黑体StdR.otf');
 }
 *,
 *::before,
