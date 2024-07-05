@@ -166,7 +166,21 @@
                   <el-progress
                     color="#D66646"
                     :stroke-width="15"
-                    :percentage="80"
+                    :percentage="
+                      index === 0
+                        ? 100
+                        : index === 1
+                          ? (netIncreaseDate[1].value /
+                              netIncreaseDate[0].value) *
+                            100
+                          : index === 2
+                            ? (netIncreaseDate[2].value /
+                                netIncreaseDate[0].value) *
+                              100
+                            : (netIncreaseDate[3].value /
+                                netIncreaseDate[0].value) *
+                              100
+                    "
                   >
                     <span class="netIncrease-data-box-progressText">
                       {{ formatNumber(item.value / 10000) }}
@@ -358,8 +372,10 @@ import {
   getCompanyApi,
 } from '@/api/index'
 const year = ref(dayjs().year().toString())
-const month = ref(dayjs().month().toString())
+const month = ref((dayjs().month() + 1).toString())
 const storeDate = useStore()
+
+console.log(dayjs().month())
 
 // 年度列表
 const yearList = [
@@ -487,10 +503,10 @@ const getCardList = async () => {
   const { data: data3 } = await getFinancingRateApi()
   const temp3 = {}
   temp3.name = '融资平均利率'
-  temp3.rzye = data3.rate
+  temp3.rzye = data3.rate * 100
   temp3.yncb = ((data3.rate - data3.snm) / data3.snm) * 100
-  temp3.bnd = data3.bnd
-  temp3.snm = data3.snm
+  temp3.bnd = data3.bnd * 100
+  temp3.snm = data3.snm * 100
   temp3.qntq = ((data3.rate - data3.qntq) / data3.qntq) * 100
   cardList.value.push(temp3)
 
@@ -897,6 +913,9 @@ render()
     width: 35%;
     margin-left: 1%;
     margin-top: 1.5%;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
   }
   .term,
   .productCategory {
@@ -912,6 +931,7 @@ render()
   }
   .productCategory {
     height: 46%;
+    flex: 1;
   }
   .netIncrease {
     font-weight: 600;

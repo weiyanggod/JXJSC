@@ -4,6 +4,6 @@ import dayjs from 'dayjs'
 export const useStore = defineStore('store', () => {
   return {
     year: dayjs().year().toString(),
-    month: dayjs().month().toString(),
+    month: (dayjs().month() + 1).toString(),
   }
 })
