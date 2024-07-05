@@ -48,7 +48,7 @@
           <div style="display: flex; justify-content: space-between">
             <div>
               <span class="number">
-                {{ item.rzye }}
+                {{ formatNumber(item.rzye) }}
               </span>
               <span v-if="index !== 3" class="unit">亿</span>
               <span v-else class="unit">%</span>
@@ -57,10 +57,10 @@
               <span>
                 <span class="compareText">与年初比</span>
                 <span v-if="item.yncb > 0" class="percent">
-                  {{ item.yncb + '%' }}
+                  {{ formatNumber(item.yncb) + '%' }}
                 </span>
                 <span v-else class="percent" style="color: #1e8e00">
-                  {{ item.yncb + '%' }}
+                  {{ formatNumber(item.yncb) + '%' }}
                 </span>
                 <el-icon
                   v-if="item.yncb > 0"
@@ -86,14 +86,14 @@
           <div>
             <div class="compareText">本年度</div>
             <span class="number">
-              {{ item.bnd }}
+              {{ formatNumber(item.bnd) }}
             </span>
             <span v-if="index !== 3" class="unit">亿</span>
           </div>
           <div>
             <div class="compareText">上年末</div>
             <span class="number">
-              {{ item.snm }}
+              {{ formatNumber(item.snm) }}
             </span>
             <span v-if="index !== 3" class="unit">亿</span>
           </div>
@@ -101,10 +101,10 @@
             <div class="compareText">去年同期</div>
             <div style="display: flex">
               <div v-if="item.qntq > 0" class="number">
-                +{{ item.qntq + '%' }}
+                +{{ formatNumber(item.qntq) + '%' }}
               </div>
               <div v-else class="number">
-                {{ item.qntq + '%' }}
+                {{ formatNumber(item.qntq) + '%' }}
               </div>
             </div>
           </div>
@@ -131,80 +131,186 @@
             />
           </el-select>
         </div>
-        <div style="font-size: 0; margin-bottom: 1%">
+        <div style="font-size: 0">
           <img src="@/assets/img/主体融资情况装饰.png" />
         </div>
-        <!-- <el-table
-          :header-cell-style="headerCellStyle"
-          :row-style="rowStyle"
-          :cell-style="cellStyle"
-          :data="tableData"
-          style="width: 100%"
-          ail
+        <div
+          v-loading="loadingMainFinancing"
+          style="
+            padding: 1%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            flex: 1;
+          "
         >
-          <el-table-column prop="date" label="" width="120" align="center" />
-          <el-table-column label="当前" align="center">
-            <template #default="{ row }">
-              <div>
-                {{
-                  (row.thisYear.inVivo + row.thisYear.inVitro).toLocaleString()
-                }}
+          <div>
+            <div class="hightCenter netIncrease">
+              <i class="iconfont icon-zhuangshizuo"></i>
+              净增量
+            </div>
+            <!-- 净增量 -->
+            <div class="netIncrease-data">
+              <div
+                v-for="(item, index) in netIncreaseDate"
+                :key="index"
+                class="netIncrease-data-box hightCenter"
+                :style="{
+                  'margin-top': index === 0 || index === 1 ? '0%' : '3%',
+                }"
+              >
+                <span class="netIncrease-data-box-name" style="">
+                  {{ item.name }}
+                </span>
+                <div style="flex: 1">
+                  <el-progress
+                    color="#D66646"
+                    :stroke-width="15"
+                    :percentage="80"
+                  >
+                    <span class="netIncrease-data-box-progressText">
+                      {{ formatNumber(item.value / 10000) }}
+                    </span>
+                    <span class="netIncrease-data-box-progressUint">亿元</span>
+                  </el-progress>
+                </div>
               </div>
-              <div>
-                <el-tag type="info" round color="#FFF9F7">
-                  <text style="color: #3d3d3d; font-style: italic">体内:</text>
-                  {{ row.thisYear.inVivo.toLocaleString() }}
-                </el-tag>
+            </div>
+          </div>
+          <!-- 利率 -->
+          <div style="display: flex">
+            <!-- 平均利率 -->
+            <div style="width: 50%" class="averageInterestRate">
+              <span class="averageInterestRate-title hightCenter netIncrease">
+                <i class="iconfont icon-zhuangshizuo"></i>
+                平均利率
+              </span>
+              <div
+                v-for="(item, index) in [
+                  { name: '目标', value: averageInterestRate?.mb },
+                  {
+                    name: '执行',
+                    value: averageInterestRate?.zx * 100,
+                  },
+                ]"
+                :key="index"
+                class="averageInterestRate-box"
+              >
+                <div class="averageInterestRate-box-title">{{ item.name }}</div>
+                <div>
+                  <span
+                    style="font-family: '优设标题黑'; font-size: 36px"
+                    :style="{ color: index === 1 ? '#D66646' : '#8d8e8e' }"
+                  >
+                    {{ formatNumber(item.value) }}
+                  </span>
+                  <text>%</text>
+                </div>
               </div>
-              <div>
-                <el-tag type="info" round color="#FFF9F7">
-                  <text style="color: #3d3d3d; font-style: italic">体外:</text>
-                  {{ row.thisYear.inVitro.toLocaleString() }}
-                </el-tag>
+            </div>
+            <!-- 负债率 -->
+            <div style="width: 50%" class="averageInterestRate">
+              <span class="averageInterestRate-title hightCenter netIncrease">
+                <i class="iconfont icon-zhuangshizuo"></i>
+                负债率
+              </span>
+              <div
+                v-for="(item, index) in [
+                  { name: '目标', value: liabilitiesRateDate?.mb },
+                  {
+                    name: '执行',
+                    value: liabilitiesRateDate?.zx * 100,
+                  },
+                ]"
+                :key="index"
+                class="averageInterestRate-box"
+              >
+                <div class="averageInterestRate-box-title">{{ item.name }}</div>
+                <div>
+                  <span
+                    style="font-family: '优设标题黑'; font-size: 36px"
+                    :style="{ color: index === 1 ? '#D66646' : '#8d8e8e' }"
+                  >
+                    {{ formatNumber(item.value) }}
+                  </span>
+                  <text>%</text>
+                </div>
               </div>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="净增目标" width="180" align="center">
-            <template #default="{ row }">
-              <div>{{ row.target.toLocaleString() }}</div>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="净增" align="center">
-            <template #default="{ row }">
-              <div>
-                {{
-                  (row.LastYear.inVivo + row.LastYear.inVitro).toLocaleString()
-                }}
+            </div>
+          </div>
+          <!-- 余额 -->
+          <div class="balance">
+            <!-- 融资余额 -->
+            <div
+              v-for="(item, index) in balance"
+              :key="index"
+              class="financing"
+            >
+              <div class="icon">
+                <i v-if="index === 0" class="iconfont icon-yue"></i>
+                <i v-if="index === 1" class="iconfont icon-zichan1"></i>
               </div>
-              <div>
-                <el-tag type="info" round color="#FFF9F7">
-                  <text style="color: #3d3d3d; font-style: italic">体内:</text>
-                  {{ row.LastYear.inVivo.toLocaleString() }}
-                </el-tag>
+              <div class="text">{{ item.name }}</div>
+              <div style="margin-left: 5%; flex: 1">
+                <div class="number">
+                  <div>{{ formatNumber(item.thisYearNumber / 10000) }}</div>
+                  <div style="font-size: 16px; margin-left: 2%">亿元</div>
+                </div>
+                <div class="proportion">
+                  <div style="font-size: 16px; color: #3d3d3d">较去年同期</div>
+                  <div
+                    v-if="item.proportion > 0"
+                    style="
+                      font-size: 20px;
+                      color: #d66646;
+                      margin-left: 20px;
+                      font-family: '优设标题黑';
+                    "
+                  >
+                    {{ formatNumber(item.proportion) }}%
+                  </div>
+                  <div
+                    v-if="item.proportion < 0"
+                    style="
+                      font-size: 20px;
+                      color: #1e8e00;
+                      margin-left: 20px;
+                      font-family: '优设标题黑';
+                    "
+                  >
+                    {{ formatNumber(item.proportion) }}%
+                  </div>
+                  <div
+                    v-if="item.proportion === 0"
+                    style="
+                      font-size: 20px;
+                      margin-left: 20px;
+                      font-family: '优设标题黑';
+                    "
+                  >
+                    {{ formatNumber(item.proportion) }}%
+                  </div>
+                  <el-icon
+                    v-if="item.proportion > 0"
+                    size="16"
+                    color="#b95440"
+                    style="vertical-align: -10%; margin-left: 5px"
+                  >
+                    <Top />
+                  </el-icon>
+                  <el-icon
+                    v-if="item.proportion < 0"
+                    size="16"
+                    color="#1E8E00"
+                    style="vertical-align: -10%; margin-left: 5px"
+                  >
+                    <Bottom />
+                  </el-icon>
+                </div>
               </div>
-              <div>
-                <el-tag type="info" round color="#FFF9F7">
-                  <text style="color: #3d3d3d; font-style: italic">体外:</text>
-                  {{ row.LastYear.inVitro.toLocaleString() }}
-                </el-tag>
-              </div>
-            </template>
-          </el-table-column>
-
-          <el-table-column
-            prop="implementationRate"
-            label="执行率"
-            align="center"
-          />
-
-          <el-table-column
-            prop="sameTimeLastYear"
-            label="去年同期"
-            align="center"
-          />
-        </el-table> -->
+            </div>
+          </div>
+        </div>
       </div>
       <div class="rightContent">
         <!-- 期限分析 -->
@@ -243,6 +349,13 @@ import {
   getNetIncreaseApi,
   getFinancingPeriodApi,
   getFinancingProductApi,
+  getAverageRateApi,
+  getLiabilitiesRateApi,
+  getDebtApi,
+  getQntqDebtApi,
+  getCjyeApi,
+  getQnCjyeApi,
+  getCompanyApi,
 } from '@/api/index'
 const year = ref(dayjs().year().toString())
 const month = ref(dayjs().month().toString())
@@ -345,40 +458,40 @@ const getCardList = async () => {
   const { data: data1 } = await getFinancingBalanceApi()
   const temp1 = {}
   temp1.name = '融资余额'
-  temp1.rzye = (data1.rzye / 10000).toFixed(2)
-  temp1.yncb = (((data1.rzye - data1.snd) / data1.snd) * 100).toFixed(2)
-  temp1.bnd = (data1.bnd / 10000).toFixed(2)
-  temp1.snm = (data1.snd / 10000).toFixed(2)
-  temp1.qntq = ((data1.rzye - data1.qntq) / data1.qntq).toFixed(2) * 100
+  temp1.rzye = data1.rzye / 10000
+  temp1.yncb = ((data1.rzye - data1.snd) / data1.snd) * 100
+  temp1.bnd = data1.bnd / 10000
+  temp1.snm = data1.snd / 10000
+  temp1.qntq = ((data1.rzye - data1.qntq) / data1.qntq) * 100
   cardList.value.push(temp1)
 
   const { data: data2 } = await getInterbankBalanceApi()
   const temp2 = {}
   temp2.name = '拆借余额'
-  temp2.rzye = (data2.cjye / 10000).toFixed(2)
-  temp2.yncb = (((data2.cjye - data2.snm) / data2.snm) * 100).toFixed(2)
-  temp2.bnd = (data2.bnd / 10000).toFixed(2)
-  temp2.snm = (data2.snm / 10000).toFixed(2)
-  temp2.qntq = ((data2.cjye - data2.qntq) / data2.qntq).toFixed(2) * 100
+  temp2.rzye = data2.cjye / 10000
+  temp2.yncb = ((data2.cjye - data2.snm) / data2.snm) * 100
+  temp2.bnd = data2.bnd / 10000
+  temp2.snm = data2.snm / 10000
+  temp2.qntq = ((data2.cjye - data2.qntq) / data2.qntq) * 100
   cardList.value.push(temp2)
 
   cardList.value.push({
     name: '总余额',
-    rzye: (temp1.rzye * 1 + temp2.rzye * 1).toFixed(2),
-    yncb: ((+temp1.yncb * 1 + temp2.yncb * 1) / 2).toFixed(2),
-    bnd: (+temp1.bnd * 1 + temp2.bnd * 1).toFixed(2),
-    snm: (+temp1.snm * 1 + temp2.snm * 1).toFixed(2),
-    qntq: ((+temp1.qntq * 1 + temp2.qntq * 1) / 2).toFixed(2),
+    rzye: temp1.rzye * 1 + temp2.rzye * 1,
+    yncb: (+temp1.yncb * 1 + temp2.yncb * 1) / 2,
+    bnd: +temp1.bnd * 1 + temp2.bnd * 1,
+    snm: +temp1.snm * 1 + temp2.snm * 1,
+    qntq: (+temp1.qntq * 1 + temp2.qntq * 1) / 2,
   })
 
   const { data: data3 } = await getFinancingRateApi()
   const temp3 = {}
   temp3.name = '融资平均利率'
-  temp3.rzye = data3.rate.toFixed(2)
-  temp3.yncb = (((data3.rate - data3.snm) / data3.snm) * 100).toFixed(2)
-  temp3.bnd = data3.bnd.toFixed(2)
-  temp3.snm = data3.snm.toFixed(2)
-  temp3.qntq = ((data3.rate - data3.qntq) / data3.qntq).toFixed(2) * 100
+  temp3.rzye = data3.rate
+  temp3.yncb = ((data3.rate - data3.snm) / data3.snm) * 100
+  temp3.bnd = data3.bnd
+  temp3.snm = data3.snm
+  temp3.qntq = ((data3.rate - data3.qntq) / data3.qntq) * 100
   cardList.value.push(temp3)
 
   loadingCard.value = false
@@ -387,178 +500,107 @@ const getCardList = async () => {
 const group = ref('梅里集团')
 
 // 集团列表
-const groupSelect = ref([
-  {
-    value: '城投集团',
-    label: '城投集团',
-  },
-  {
-    value: '嘉秀本级',
-    label: '嘉秀本级',
-  },
-  {
-    value: '盛洪集团',
-    label: '盛洪集团',
-  },
-  {
-    value: '高新控股集团',
-    label: '高新控股集团',
-  },
-  {
-    value: '交投集团',
-    label: '交投集团',
-  },
-  {
-    value: '梅里集团',
-    label: '梅里集团',
-  },
-  {
-    value: '嘉腾集团',
-    label: '嘉腾集团',
-  },
-  {
-    value: '闻川集团',
-    label: '闻川集团',
-  },
-  {
-    value: '麟湖集团',
-    label: '麟湖集团',
-  },
-  {
-    value: '秀宏集团',
-    label: '秀宏集团',
-  },
-])
+const groupSelect = ref([])
 
+const getCompany = async () => {
+  groupSelect.value = []
+  const { data } = await getCompanyApi()
+  data.forEach((item) => {
+    groupSelect.value.push({
+      value: item.name,
+      label: item.name,
+    })
+  })
+}
+getCompany()
 // 更改集团
 const changeGroup = () => {
-  getTableDate()
+  getMainFinancingDate()
 }
 
-const tableData = ref([
-  // {
-  //   date: '融资余额',
-  //   target: 5500100,
-  //   thisYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   implementationRate: '81.01%',
-  //   LastYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   sameTimeLastYear: '5.0%',
-  // },
-  // {
-  //   date: '拆借余额',
-  //   target: 5500100,
-  //   thisYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   implementationRate: '81.01%',
-  //   LastYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   sameTimeLastYear: '5.0%',
-  // },
-  // {
-  //   date: '总余额',
-  //   target: 5500100,
-  //   thisYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   implementationRate: '81.01%',
-  //   LastYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   sameTimeLastYear: '5.0%',
-  // },
-  // {
-  //   date: '平均利率',
-  //   target: 5500100,
-  //   thisYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   implementationRate: '81.01%',
-  //   LastYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   sameTimeLastYear: '5.0%',
-  // },
-  // {
-  //   date: '负债率',
-  //   target: 5500100,
-  //   thisYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   implementationRate: '81.01%',
-  //   LastYear: {
-  //     inVivo: 500000,
-  //     inVitro: 410100,
-  //   },
-  //   sameTimeLastYear: '5.0%',
-  // },
-])
-
-// 获取表格数据
-const getTableDate = async () => {
+const loadingMainFinancing = ref(false)
+// 净增量
+const netIncreaseDate = ref([])
+// 平均利率
+const averageInterestRate = ref([])
+// 负债率
+const liabilitiesRateDate = ref([])
+// 融资余额和拆借余额数据
+const balance = ref([])
+// 获取主体融资情况数据
+const getMainFinancingDate = async () => {
+  loadingMainFinancing.value = true
+  // 净增量
+  netIncreaseDate.value = []
   const { data } = await getNetIncreaseApi(group.value)
-  console.log(data)
-  tableData.value.push({
-    date: '融资余额',
-    target: data.jzlmb,
-    thisYear: {
-      inVivo: data.txn,
-      inVitro: data.txw,
-    },
-    implementationRate: data.zxl,
+  netIncreaseDate.value.push({
+    name: '目标',
+    value: data.jzlmb,
   })
-  console.log(data)
+  netIncreaseDate.value.push({
+    name: '体内',
+    value: data.txn,
+  })
+  netIncreaseDate.value.push({
+    name: '执行',
+    value: data.zx,
+  })
+  netIncreaseDate.value.push({
+    name: '体外',
+    value: data.txw,
+  })
+  // 平均利率
+  const { data: data2 } = await getAverageRateApi(group.value)
+  averageInterestRate.value = data2
+  // 负债率
+  const { data: data3 } = await getLiabilitiesRateApi(group.value)
+  liabilitiesRateDate.value = data3
+
+  // 融资余额
+  balance.value = []
+  const { data: data4 } = await getDebtApi(group.value)
+  const { data: data5 } = await getQntqDebtApi(group.value)
+  const temp = {
+    name: '融资余额',
+    thisYearNumber: 0,
+    lastYear: 0,
+    proportion: 0,
+  }
+  data4.forEach((item) => {
+    temp.thisYearNumber += item.rzye
+  })
+  data5.forEach((item) => {
+    temp.lastYear += item.rzye
+  })
+  if (temp.thisYearNumber !== 0 || temp.lastYear !== 0) {
+    temp.proportion =
+      ((temp.thisYearNumber - temp.lastYear) / temp.lastYear) * 100
+  }
+  balance.value.push(temp)
+
+  // 融资余额
+  const { data: data6 } = await getCjyeApi(group.value)
+  const { data: data7 } = await getQnCjyeApi(group.value)
+  const temp2 = {
+    name: '拆借余额',
+    thisYearNumber: 0,
+    lastYear: 0,
+    proportion: 0,
+  }
+  data6.forEach((item) => {
+    temp2.thisYearNumber += item.cjye
+  })
+  data7.forEach((item) => {
+    temp2.lastYear += item.cjye
+  })
+
+  if (temp2.thisYearNumber !== 0 || temp2.lastYear !== 0) {
+    temp2.proportion =
+      ((temp2.thisYearNumber - temp2.lastYear) / temp2.lastYear) * 100
+  }
+  balance.value.push(temp2)
+  loadingMainFinancing.value = false
 }
-
-// // 表头样式
-// const headerCellStyle = () => {
-//   return {
-//     fontFamily: 'AlibabaPuHuiTi-2-55-Regular',
-//     color: '#2C2C2C',
-//     fontSize: '16px',
-//   }
-// }
-
-// const cellStyle = ({ columnIndex }) => {
-//   if (columnIndex === 0) {
-//     return {
-//       color: '#000',
-//     }
-//   }
-// }
-
-// const rowStyle = ({ rowIndex }) => {
-//   const style = {
-//     fontFamily: 'AlibabaPuHuiTi-2-55-Regular',
-//     color: '#2C2C2C',
-//     fontSize: '16px',
-//   }
-//   if (rowIndex % 2 === 0) {
-//     return {
-//       background: '#fbf0ed',
-//       ...style,
-//     }
-//   } else {
-//     return {
-//       background: '#ffffff',
-//       ...style,
-//     }
-//   }
-// }
 
 // 期限分析
 const termEcharts = ref()
@@ -577,6 +619,7 @@ const termEchartsOption = {
       itemStyle: {
         normal: {
           label: {
+            fontFamily: 'AlibabaPuHuiTi-2-55-Regular',
             formatter: '{b} \n\n {d}%',
             padding: [0, -80],
           },
@@ -655,15 +698,16 @@ let productCategoryEchartsOption = {
         formatter: (data) => {
           if (productCategory.value) {
             return (
-              (productCategory.value[0].zb * 100).toFixed(0) +
+              (productCategory.value[0].zb * 100).toFixed(2) +
               '%' +
               '\n\n\n\n' +
-              data.value +
+              data.value.toFixed(2) +
               '亿元'
             )
           }
-          return data.value + '\n\n\n\n'
+          return data.value.toFixed(2) + '\n\n\n\n'
         },
+        fontFamily: 'AlibabaPuHuiTi-2-55-Regular',
         fontSize: 18,
         color: '#2C2C2C',
       },
@@ -686,15 +730,16 @@ let productCategoryEchartsOption = {
         formatter: (data) => {
           if (productCategory.value) {
             return (
-              (productCategory.value[1].zb * 100).toFixed(0) +
+              (productCategory.value[1].zb * 100).toFixed(2) +
               '%' +
               '\n\n\n\n' +
-              data.value +
+              data.value.toFixed(2) +
               '亿元'
             )
           }
-          return data.value + '\n\n\n\n'
+          return data.value.toFixed(2) + '\n\n\n\n'
         },
+        fontFamily: 'AlibabaPuHuiTi-2-55-Regular',
         fontSize: 18,
         color: '#2C2C2C',
         offset: [200, 0],
@@ -716,12 +761,8 @@ const getChartsDate = async () => {
 
   const { data: data2 } = await getFinancingProductApi()
   productCategory.value = data2
-  productCategoryEchartsOption.series[0].data = [
-    (data2[0].zxs / 10000).toFixed(0),
-  ]
-  productCategoryEchartsOption.series[1].data = [
-    (data2[1].zxs / 10000).toFixed(0),
-  ]
+  productCategoryEchartsOption.series[0].data = [data2[0].zxs / 10000]
+  productCategoryEchartsOption.series[1].data = [data2[1].zxs / 10000]
   echarts
     .init(productCategoryEcharts.value)
     .setOption(productCategoryEchartsOption)
@@ -734,10 +775,19 @@ const getWeek = () => {
   return '星期' + week[datas]
 }
 
+// 格式化数字
+const formatNumber = (number) => {
+  if (number && number !== 0) {
+    return number.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,')
+  } else {
+    return number
+  }
+}
+
 const render = () => {
   getCardList()
   getChartsDate()
-  getTableDate()
+  getMainFinancingDate()
 }
 render()
 </script>
@@ -791,12 +841,11 @@ render()
         font-size: 20px;
         color: #2c2c2c;
         line-height: 34px;
-        margin-bottom: 10px;
       }
       .number {
         font-family: '优设标题黑';
         font-weight: 400;
-        font-size: 20px;
+        font-size: 36px;
         color: #2c2c2c;
       }
       .unit {
@@ -823,9 +872,11 @@ render()
         color: #858383;
       }
       .bottom {
-        margin-top: 2%;
         display: flex;
         justify-content: space-between;
+        .number {
+          font-size: 24px;
+        }
       }
     }
   }
@@ -839,6 +890,8 @@ render()
     margin-top: 1.5%;
     margin-left: 1%;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
   }
   .rightContent {
     width: 35%;
@@ -859,7 +912,104 @@ render()
   }
   .productCategory {
     height: 46%;
-    margin-top: 3%;
+  }
+  .netIncrease {
+    font-weight: 600;
+    color: #3d3d3d;
+    font-style: italic;
+    i {
+      font-size: 30px;
+      margin-right: 10px;
+    }
+    &-data {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      &-box {
+        width: 45%;
+        justify-content: space-around;
+        &-name {
+          margin-right: 3%;
+          font-size: 18px;
+          font-family: 'AlibabaPuHuiTi-2-55-Regular';
+        }
+        &-progressText {
+          font-family: '优设标题黑';
+          font-weight: 400;
+          font-size: 20px;
+          color: #d66646;
+        }
+        &-progressUint {
+          font-family: 'AlibabaPuHuiTi-2-55-Regular';
+          font-size: 16px;
+          margin-left: 10px;
+        }
+      }
+    }
+  }
+  .averageInterestRate {
+    &-title {
+      margin-right: 10px;
+    }
+    &-box {
+      display: inline-block;
+      width: 50%;
+      margin-top: 2%;
+      padding: 0 6%;
+      &-title {
+        font-family: 'AlibabaPuHuiTi-2-55-Regular';
+        font-size: 18px;
+        color: #3d3d3d;
+        font-style: italic;
+      }
+    }
+  }
+  .balance {
+    display: flex;
+    font-family: 'AlibabaPuHuiTi-2-55-Regular';
+    font-weight: 400;
+    color: #3d3d3d;
+    .financing {
+      width: 50%;
+      display: flex;
+      align-items: center;
+      .icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #ffe7e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        i {
+          font-size: 60px;
+        }
+      }
+      .text {
+        font-family: 'AlibabaPuHuiTi-2-55-Regular';
+        font-weight: 400;
+        font-size: 24px;
+        color: #3d3d3d;
+        margin-left: 20px;
+      }
+      .number {
+        display: flex;
+        font-family: '优设标题黑';
+        font-weight: 400;
+        font-size: 36px;
+        color: #2c2c2c;
+      }
+      .proportion {
+        font-size: 36px;
+        color: #3d3d3d;
+      }
+      .number,
+      .proportion {
+        display: flex;
+        align-items: center;
+      }
+    }
   }
 }
 .title {

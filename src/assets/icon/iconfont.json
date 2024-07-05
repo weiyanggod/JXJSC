@@ -1,0 +1,51 @@
+{
+  "id": "4553750",
+  "name": "嘉秀驾驶舱",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "24111880",
+      "name": "资产",
+      "font_class": "zichan1",
+      "unicode": "fbfb",
+      "unicode_decimal": 64507
+    },
+    {
+      "icon_id": "37110698",
+      "name": "会员赔付",
+      "font_class": "huiyuanpeifu",
+      "unicode": "1012e",
+      "unicode_decimal": 65838
+    },
+    {
+      "icon_id": "23925936",
+      "name": "装饰左",
+      "font_class": "zhuangshizuo",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "26531870",
+      "name": "竖条",
+      "font_class": "shutiao-copy",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "2718740",
+      "name": "下",
+      "font_class": "xia",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "19708553",
+      "name": "箭头左",
+      "font_class": "zuojiantou",
+      "unicode": "e82a",
+      "unicode_decimal": 59434
+    }
+  ]
+}
