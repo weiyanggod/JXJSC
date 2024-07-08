@@ -84,28 +84,50 @@
         </div>
         <div class="bottom">
           <div>
-            <div class="compareText">本年度</div>
-            <span class="number">
+            <div class="compareText">本年度新增</div>
+            <span v-if="index === 3" class="number">
+              {{ formatNumber(item.bnd) + '%' }}
+            </span>
+            <span v-else class="number">
               {{ formatNumber(item.bnd) }}
             </span>
             <span v-if="index !== 3" class="unit">亿</span>
           </div>
           <div>
             <div class="compareText">上年末</div>
-            <span class="number">
+            <span v-if="index === 3" class="number">
+              {{ formatNumber(item.snm) + '%' }}
+            </span>
+            <span v-else class="number">
               {{ formatNumber(item.snm) }}
             </span>
             <span v-if="index !== 3" class="unit">亿</span>
           </div>
           <div>
             <div class="compareText">去年同期</div>
-            <div style="display: flex">
-              <div v-if="item.qntq > 0" class="number">
-                +{{ formatNumber(item.qntq) + '%' }}
-              </div>
-              <div v-else class="number">
+            <div style="display: flex; align-items: center">
+              <div v-if="item.qntq > 0" class="number" style="color: #b95440">
                 {{ formatNumber(item.qntq) + '%' }}
               </div>
+              <div v-else class="number" style="color: #1e8e00">
+                {{ formatNumber(item.qntq) + '%' }}
+              </div>
+              <el-icon
+                v-if="item.qntq > 0"
+                size="16"
+                color="#b95440"
+                style="vertical-align: -10%"
+              >
+                <Top />
+              </el-icon>
+              <el-icon
+                v-else
+                size="16"
+                color="#1E8E00"
+                style="vertical-align: -10%"
+              >
+                <Bottom />
+              </el-icon>
             </div>
           </div>
         </div>
@@ -155,32 +177,61 @@
                 v-for="(item, index) in netIncreaseDate"
                 :key="index"
                 class="netIncrease-data-box hightCenter"
-                :style="{
-                  'margin-top': index === 0 || index === 1 ? '0%' : '3%',
-                }"
+                :style="formatNetIncreaseBoxStyle(index)"
               >
-                <span class="netIncrease-data-box-name" style="">
+                <!-- 此div用于设置环形进度条渐变 -->
+                <div style="width: 0px; height: 0px">
+                  <svg width="100%" height="100%">
+                    <defs>
+                      <linearGradient
+                        id="write"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="0%"
+                      >
+                        <stop
+                          offset="0%"
+                          style="stop-color: rgba(214, 102, 70, 1)"
+                          stop-opacity="0.8"
+                        ></stop>
+                        <stop
+                          offset="100%"
+                          style="stop-color: rgba(230, 212, 207, 1)"
+                          stop-opacity="1"
+                        ></stop>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <!-- 环形进度条 -->
+                <div
+                  v-if="index === 3"
+                  class="netIncrease-data-box-implementationRate"
+                >
+                  <el-progress
+                    :stroke-width="10"
+                    :percentage="formatNumber(item.value * 100) * 1"
+                    type="circle"
+                  >
+                    <span
+                      class="netIncrease-data-box-implementationRate-circle"
+                    >
+                      {{ (item.value * 100).toFixed(0) }}
+                    </span>
+                    <span>%</span>
+                  </el-progress>
+                  <div class="test">执行率</div>
+                </div>
+                <!-- 柱状进度条 -->
+                <span v-if="index !== 3" class="netIncrease-data-box-name">
                   {{ item.name }}
                 </span>
-                <div style="flex: 1">
+                <div v-if="index !== 3" style="flex: 1">
                   <el-progress
                     color="#D66646"
                     :stroke-width="15"
-                    :percentage="
-                      index === 0
-                        ? 100
-                        : index === 1
-                          ? (netIncreaseDate[1].value /
-                              netIncreaseDate[0].value) *
-                            100
-                          : index === 2
-                            ? (netIncreaseDate[2].value /
-                                netIncreaseDate[0].value) *
-                              100
-                            : (netIncreaseDate[3].value /
-                                netIncreaseDate[0].value) *
-                              100
-                    "
+                    :percentage="formatNetIncreasePercentage(index)"
                   >
                     <span class="netIncrease-data-box-progressText">
                       {{ formatNumber(item.value / 10000) }}
@@ -371,11 +422,10 @@ import {
   getQnCjyeApi,
   getCompanyApi,
 } from '@/api/index'
+import type { transform } from 'typescript'
 const year = ref(dayjs().year().toString())
 const month = ref((dayjs().month() + 1).toString())
 const storeDate = useStore()
-
-console.log(dayjs().month())
 
 // 年度列表
 const yearList = [
@@ -549,6 +599,7 @@ const getMainFinancingDate = async () => {
   // 净增量
   netIncreaseDate.value = []
   const { data } = await getNetIncreaseApi(group.value)
+
   netIncreaseDate.value.push({
     name: '目标',
     value: data.jzlmb,
@@ -560,6 +611,10 @@ const getMainFinancingDate = async () => {
   netIncreaseDate.value.push({
     name: '执行',
     value: data.zx,
+  })
+  netIncreaseDate.value.push({
+    name: '执行率',
+    value: data.zxl,
   })
   netIncreaseDate.value.push({
     name: '体外',
@@ -791,6 +846,27 @@ const getWeek = () => {
   return '星期' + week[datas]
 }
 
+const formatNetIncreaseBoxStyle = (index) => {
+  return {
+    'margin-top': index === 0 || index === 1 || index === 3 ? '0%' : '5%',
+    width: index === 3 ? '10%' : '40%',
+    position: index === 3 ? 'absolute' : '',
+    left: index === 3 ? '50%' : '',
+    transform: index === 3 ? 'translate(-50%,-3%)' : '',
+  }
+}
+
+const formatNetIncreasePercentage = (index) => {
+  if (index === 0) {
+    return 100
+  } else {
+    return (
+      (netIncreaseDate.value[index].value / netIncreaseDate.value[0].value) *
+      100
+    )
+  }
+}
+
 // 格式化数字
 const formatNumber = (number) => {
   if (number && number !== 0) {
@@ -942,17 +1018,39 @@ render()
       margin-right: 10px;
     }
     &-data {
+      position: relative;
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
       margin-top: 20px;
       &-box {
-        width: 45%;
+        width: 40%;
         justify-content: space-around;
         &-name {
           margin-right: 3%;
           font-size: 18px;
           font-family: 'AlibabaPuHuiTi-2-55-Regular';
+        }
+        &-implementationRate {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-size: 16px;
+          color: #3d3d3d;
+          font-family: 'AlibabaPuHuiTi-2-55-Regular';
+          &-circle {
+            font-size: 26px;
+            color: #000000;
+          }
+          .test {
+            margin-top: 10px;
+            font-size: 18px;
+          }
+          .number {
+            font-family: '优设标题黑';
+            font-size: 18px;
+            color: #3d3d3d;
+          }
         }
         &-progressText {
           font-family: '优设标题黑';
@@ -1058,5 +1156,13 @@ img {
 .hightCenter {
   display: flex;
   align-items: center;
+}
+:deep(.el-progress--circle .el-progress-circle) {
+  width: 80px !important;
+  height: 80px !important;
+}
+:deep(.el-progress-circle svg > path:nth-child(2)) {
+  //.circle是环形el-progress取的类名 write是svg的id
+  stroke: url(#write);
 }
 </style>
