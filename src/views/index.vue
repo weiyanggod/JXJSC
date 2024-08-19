@@ -713,7 +713,7 @@ let productCategory = ref()
 let productCategoryEcharts = ref()
 let productCategoryEchartsOption = {
   grid: {
-    top: 'center',
+    top: '100',
     left: 0,
     right: 0,
     containLabel: true,
@@ -761,7 +761,7 @@ let productCategoryEchartsOption = {
     {
       name: '条',
       type: 'bar',
-      barWidth: 50,
+      barWidth: 30,
       data: [80],
       barCategoryGap: 20,
       label: {
@@ -793,7 +793,7 @@ let productCategoryEchartsOption = {
       name: '进度条背景',
       type: 'bar',
       barGap: '-100%',
-      barWidth: 50,
+      barWidth: 30,
       data: [100],
       color: '#8d8e8e',
       label: {
@@ -989,7 +989,6 @@ render()
     width: 35%;
     margin-left: 1%;
     margin-top: 1.5%;
-    background-color: #fff;
     display: flex;
     flex-direction: column;
   }
@@ -1006,8 +1005,14 @@ render()
     }
   }
   .productCategory {
-    height: 46%;
+    margin-top: 20px;
     flex: 1;
+    display: flex;
+    .productCategoryEcharts {
+      box-sizing: border-box;
+      width: 90%;
+      margin-left: 5%;
+    }
   }
   .netIncrease {
     font-weight: 600;
