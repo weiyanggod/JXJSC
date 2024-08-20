@@ -43,7 +43,7 @@
     </div>
     <div v-loading="loadingCard" class="card">
       <div v-for="(item, index) in cardList" :key="index" class="item">
-        <div>
+        <div class="top">
           <div class="title">{{ item.name }}</div>
           <div style="display: flex; justify-content: space-between">
             <div>
@@ -563,7 +563,7 @@ const getCardList = async () => {
   loadingCard.value = false
 }
 // 集团
-const group = ref('梅里集团')
+const group = ref('嘉秀本级')
 
 // 集团列表
 const groupSelect = ref([])
@@ -643,13 +643,13 @@ const getMainFinancingDate = async () => {
   data5.forEach((item) => {
     temp.lastYear += item.rzye
   })
-  if (temp.thisYearNumber !== 0 || temp.lastYear !== 0) {
+  if (temp.thisYearNumber !== 0 && temp.lastYear !== 0) {
     temp.proportion =
       ((temp.thisYearNumber - temp.lastYear) / temp.lastYear) * 100
   }
+
   balance.value.push(temp)
 
-  // 融资余额
   const { data: data6 } = await getCjyeApi(group.value)
   const { data: data7 } = await getQnCjyeApi(group.value)
   const temp2 = {
@@ -665,11 +665,13 @@ const getMainFinancingDate = async () => {
     temp2.lastYear += item.cjye
   })
 
-  if (temp2.thisYearNumber !== 0 || temp2.lastYear !== 0) {
+  if (temp2.thisYearNumber !== 0 && temp2.lastYear !== 0) {
     temp2.proportion =
       ((temp2.thisYearNumber - temp2.lastYear) / temp2.lastYear) * 100
   }
+
   balance.value.push(temp2)
+
   loadingMainFinancing.value = false
 }
 
@@ -766,25 +768,21 @@ let productCategoryEchartsOption = {
       barCategoryGap: 20,
       label: {
         show: true,
+        align: 'right',
         formatter: (data) => {
           if (productCategory.value) {
-            return (
-              (productCategory.value[0].zb * 100).toFixed(2) +
-              '%' +
-              '\n\n\n\n' +
-              data.value.toFixed(2) +
-              '亿元'
-            )
+            return (productCategory.value[0].zb * 100).toFixed(2) + '%'
           }
-          return data.value.toFixed(2) + '\n\n\n\n'
+          return data.value.toFixed(2)
         },
         fontFamily: 'AlibabaPuHuiTi-2-55-Regular',
         fontSize: 18,
-        color: '#2C2C2C',
+        color: '#fff',
       },
       itemStyle: {
         normal: {
           color: '#d66646',
+          borderRadius: [10, 10, 10, 10],
         },
       },
       zlevel: 1,
@@ -795,25 +793,72 @@ let productCategoryEchartsOption = {
       barGap: '-100%',
       barWidth: 30,
       data: [100],
+      label: {
+        show: true,
+        formatter: (data) => {
+          if (productCategory.value) {
+            return (productCategory.value[1].zb * 100).toFixed(2) + '%'
+          }
+          return data.value.toFixed(2)
+        },
+        fontFamily: 'AlibabaPuHuiTi-2-55-Regular',
+        fontSize: 18,
+        color: '#fff',
+        offset: [140, 0],
+      },
+      itemStyle: {
+        color: '#fff',
+        borderRadius: [10, 10, 10, 10],
+      },
+    },
+    {
+      name: '',
+      type: 'bar',
+      barWidth: 30,
+      data: [80],
+      color: '#8d8e8e',
+      label: {
+        show: true,
+        align: 'right',
+        formatter: (data) => {
+          if (productCategory.value) {
+            return '\n\n' + data.value.toFixed(2) + '亿元'
+          }
+          return data.value.toFixed(2)
+        },
+        fontFamily: 'AlibabaPuHuiTi-2-55-Regular',
+        fontSize: 18,
+        color: '#2C2C2C',
+        offset: [10, 18],
+      },
+      itemStyle: {
+        color: '#ffe7e1',
+        borderRadius: [10, 10, 10, 10],
+      },
+    },
+    {
+      name: '',
+      type: 'bar',
+      barWidth: 30,
+      data: [100],
       color: '#8d8e8e',
       label: {
         show: true,
         formatter: (data) => {
           if (productCategory.value) {
-            return (
-              (productCategory.value[1].zb * 100).toFixed(2) +
-              '%' +
-              '\n\n\n\n' +
-              data.value.toFixed(2) +
-              '亿元'
-            )
+            return '\n\n' + data.value.toFixed(2) + '亿元'
           }
-          return data.value.toFixed(2) + '\n\n\n\n'
+          return data.value.toFixed(2)
         },
         fontFamily: 'AlibabaPuHuiTi-2-55-Regular',
         fontSize: 18,
         color: '#2C2C2C',
-        offset: [200, 0],
+        offset: [150, 18],
+      },
+      itemStyle: {
+        color: '#b2b2b2',
+        borderRadius: [10, 10, 10, 10],
+        borderWidth: 2,
       },
     },
   ],
@@ -834,6 +879,8 @@ const getChartsDate = async () => {
   productCategory.value = data2
   productCategoryEchartsOption.series[0].data = [data2[0].zxs / 10000]
   productCategoryEchartsOption.series[1].data = [data2[1].zxs / 10000]
+  productCategoryEchartsOption.series[2].data = [data2[0].zxs / 10000]
+  productCategoryEchartsOption.series[3].data = [data2[1].zxs / 10000]
   echarts
     .init(productCategoryEcharts.value)
     .setOption(productCategoryEchartsOption)
@@ -857,8 +904,20 @@ const formatNetIncreaseBoxStyle = (index) => {
 }
 
 const formatNetIncreasePercentage = (index) => {
+  if (netIncreaseDate.value[index].value === 0) {
+    return 0
+  }
+  if (netIncreaseDate.value[0].value === 0) {
+    return 100
+  }
+
   if (index === 0) {
     return 100
+  } else if (index === 1 || index === 4) {
+    return (
+      (netIncreaseDate.value[index].value / netIncreaseDate.value[2].value) *
+      100
+    )
   } else {
     return (
       (netIncreaseDate.value[index].value / netIncreaseDate.value[0].value) *
@@ -963,8 +1022,13 @@ render()
         font-size: 14px;
         color: #858383;
       }
+      .top {
+        height: 50%;
+      }
       .bottom {
+        height: 50%;
         display: flex;
+        align-items: center;
         justify-content: space-between;
         .number {
           font-size: 24px;
