@@ -715,7 +715,7 @@ let productCategory = ref()
 let productCategoryEcharts = ref()
 let productCategoryEchartsOption = {
   grid: {
-    top: '100',
+    top: '60',
     left: 0,
     right: 0,
     containLabel: true,
